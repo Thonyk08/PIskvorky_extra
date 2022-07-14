@@ -7,6 +7,8 @@ let move = 1;
 let board = ["", "", "", "", "", "", "", "", ""];
 let danger = false;
 
+
+const winclasses = ["animate__animated", "animate__tada", "win"];
 const winningCombinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -18,22 +20,14 @@ const winningCombinations = [
     [2, 4, 6]
 ];
 
-
+//game logic - my turn, computer turn, update board, win, new game
 
 tiles.forEach((tile, index) => {
    if(move<10){
-        tile.addEventListener("click", (e) =>{
-        let currentTile = e.target;
+        tile.addEventListener("click", () =>{
         
-            if(move<10 && currentTile.innerText ==""){
-            
-                currentTile.innerText = playerTurn;
-                move ++;
-                updateBoard(index);
-                resultValidation();
-            
-            }
-            
+        
+            myTurn(tile, index);
             computerMove();
             newGame();
             
@@ -41,7 +35,21 @@ tiles.forEach((tile, index) => {
         
     }});
 
+//my turn - my choice .. update board and check win
 
+function myTurn(tile, index){
+
+    if(move<10 && tile.innerText ==""){
+            
+        tile.innerText = playerTurn;
+        move ++;
+        updateBoard(index);
+        resultValidation();
+    
+    }
+}
+
+// logic of computer turn - 1. atack move, 2. defensive move and 3. random move
 
 function computerMove(){
     
@@ -53,15 +61,15 @@ function computerMove(){
     
 };
 
+// return game to default settings
 
 function newGame(){
 
     reset.addEventListener("click", () =>{
         tiles.forEach((tile) => {
             tile.innerText= "";
-            tile.classList.remove("animate__animated");
-            tile.classList.remove("animate__tada");
-            tile.classList.remove("win")
+            removeWinClass(tile, winclasses);
+                       
         })
               
         move = 1;
@@ -70,10 +78,30 @@ function newGame(){
 });
 };
 
+// update board
 
 function updateBoard(index){
     board[index] = tiles[index].innerText;
 };
+
+// ADD and REMOVE win class and animation class
+
+function addWinClass(tile, winclasses){
+
+    for (let i = 0; i<winclasses.length; i++){
+        tile.classList.add(winclasses[i]);
+    }
+};
+
+
+function removeWinClass(tile, winclasses){
+
+    for (let i = 0; i<winclasses.length; i++){
+        tile.classList.remove(winclasses[i]);
+    }
+};
+
+//check if win is true, add win class and animation
 
 function resultValidation(){
 
@@ -92,9 +120,8 @@ function resultValidation(){
            move = 11;
            
            wincombination.forEach(tile => {
-            tiles[tile].classList.add("animate__animated");
-            tiles[tile].classList.add("animate__tada");
-            tiles[tile].classList.add("win")
+                       
+           addWinClass(tiles[tile], winclasses);
             
            })
           
@@ -102,6 +129,38 @@ function resultValidation(){
     }
 }
 
+//function of computer turn in attack or defense move
+
+function turnO (a, b, c, x, y, z){
+
+    if(a==""){
+                
+        tiles[x].innerText = computerTurn;
+        move++;
+        updateBoard(x);
+        
+    }
+    else if(b ==""){
+        
+        tiles[y].innerText = computerTurn;
+        move++;
+        updateBoard(y);
+        
+    }
+    else{
+        
+        tiles[z].innerText=computerTurn;
+        move++;
+        updateBoard(z);
+        
+    }
+    
+    resultValidation();
+    
+}
+
+
+// defense move of computer
 
 function nextMove(){
     for (let i = 0; i < winningCombinations.length; i++ ) {
@@ -122,30 +181,7 @@ function nextMove(){
         if (move<10 && ((a === b && c === "") || (b === c && a === "") || (c === a && b === "")))  {
             danger = true;
             
-                       
-            if(a==""){
-                
-                tiles[x].innerText = computerTurn;
-                move++;
-                updateBoard(x);
-                
-            }
-            else if(b ==""){
-                
-                tiles[y].innerText = computerTurn;
-                move++;
-                updateBoard(y);
-                
-            }
-            else{
-                
-                tiles[z].innerText=computerTurn;
-                move++;
-                updateBoard(z);
-                
-            }
-            
-            resultValidation();
+            turnO(a, b, c, x, y, z);             
             break;
         }
         else{
@@ -154,6 +190,8 @@ function nextMove(){
     }
 
 };
+
+//attack move of computer
 
 function winMove(){
     for (let i = 0; i < winningCombinations.length; i++ ) {
@@ -173,28 +211,7 @@ function winMove(){
 
         if (move<10 && ((a === b && b=== "O" && c === "") || (b === c && c === "O" && a === "") || (c === a && a === "O" && b === "")))  {
                                                
-            if(a==""){
-                
-                tiles[x].innerText = computerTurn;
-                move++;
-                updateBoard(x);
-               
-            }
-            else if(b ==""){
-                
-                tiles[y].innerText = computerTurn;
-                move++;
-                updateBoard(y);
-                
-            }
-            else{
-                
-                tiles[z].innerText=computerTurn;
-                move++;
-                updateBoard(z);
-                
-            }
-            resultValidation();
+            turnO(a, b, c, x, y, z);             
             break;
         }
         else{
@@ -202,6 +219,8 @@ function winMove(){
         }
     }
 };
+
+//random move of computer
 
 function randomMove(){
 
@@ -219,8 +238,8 @@ function randomMove(){
     else if(move<10 && randomtile.innerText == "" && danger == false){
         
         if(move <=2 && board[4] == ""){
-           tiles[4].innerText = computerTurn; 
-           move++;
+            tiles[4].innerText = computerTurn; 
+            move++;
             updateBoard(4);
         }
         else if(move <=2 && board[4] == "X"){
